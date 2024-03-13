@@ -1,4 +1,4 @@
-import psycopg2
+import psycopg2 as pg
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -30,13 +30,11 @@ class DatabaseConnection:
     WHERE users.username = %s;
     """
     SEARCH_MOVIE = "SELECT * FROM movies WHERE title LIKE %S;"       
-
-    def __init__(self, connection):
-        self.connection = connection
-
+    CONNECTION = pg.connect(host=os.environ["DATABASE_HOST"], database=os.environ["DATABASE_NAME"], user=os.environ["DATABASE_USER"], password=os.environ["DATABASE_PASSWORD"])
+    
     def add_movie(self, title, release_timestamp):
-        with self.connection:
-            with self.connection.cursor() as cursor:
+        with self.CONNECTION:
+            with self.CONNECTION.cursor() as cursor:
                 cursor.execute(self.INSERT_MOVIE, (title, release_timestamp))
 
 
@@ -74,11 +72,10 @@ class DatabaseConnection:
             return cursor.fetchall()
 
     def create_movies_table(self):
-        with self.connection:
-            cursor = self.connection.cursor()
+        with self.CONNECTION:
+            cursor = self.CONNECTION.cursor()
             cursor.execute(self.CREATE_MOVIES_TABLE)
             return cursor
 
-
-connection = psycopg2.connect(host=os.environ["DATABASE_HOST"], database=os.environ["DATABASE_NAME"], user=os.environ["DATABASE_USER"], password=os.environ["DATABASE_PASSWORD"])
-connectionObject = DatabaseConnection(connection)
+if __name__ == '__main__':
+    connectionObject = DatabaseConnection()
