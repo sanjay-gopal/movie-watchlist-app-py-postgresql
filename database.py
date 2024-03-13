@@ -39,35 +39,35 @@ class DatabaseConnection:
 
 
     def get_movie(self, upcoming=False):
-        with self.connection:
-            with self.connection.cursor() as cursor:
+        with self.CONNECTION:
+            with self.CONNECTION.cursor() as cursor:
                 if upcoming:
-                    today_timestamp = datetime.datetime.today().timestamp()
+                    today_timestamp = datetime.today().timestamp()
                     cursor.execute(self.SELECT_UPCOMING_MOVIES, (today_timestamp))
                 else:
                     cursor.execute(self.SELECT_ALL_MOVIES)
                 return cursor.fetchall()
 
     def add_user(self, username):
-        with self.connection:
-            with self.connection.cursor() as cursor:
+        with self.CONNECTION:
+            with self.CONNECTION.cursor() as cursor:
                 cursor.execute(self.INSERT_USER, (username))
 
 
     def watch_movie(self, username, movie_id):
-        with self.connection:
-            with self.connection.cursor() as cursor:
+        with self.CONNECTION:
+            with self.CONNECTION.cursor() as cursor:
                 cursor.execute(self.INSERT_WATCHED_MOVIE, (username, movie_id))
 
     def get_watched_movies(self, username):
-        with self.connection:
-            cursor = self.connection.cursor()
+        with self.CONNECTION:
+            cursor = self.CONNECTION.cursor()
             cursor.execute(self.SELECT_WATCHED_MOVIES, (username))
             return cursor.fetchall()
 
     def serach_movies(self, search_item):
-        with self.connection:
-            cursor = self.connection.cursor()
+        with self.CONNECTION:
+            cursor = self.CONNECTION.cursor()
             cursor.execute(self.SEARCH_MOVIE, (f"%{search_item}%"))
             return cursor.fetchall()
 
