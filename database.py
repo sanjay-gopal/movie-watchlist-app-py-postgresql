@@ -20,9 +20,12 @@ class DatabaseConnection:
     INSERT_USER = "INSERT INTO users(username) VALUES (%s);"
     SELECT_USER = "SELECT * FROM users WHERE username = %s;"
     INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp) VALUES (%s, %s);"
+
+
     SELECT_ALL_MOVIES = "SELECT * FROM movies;"
+    SELECT_MOVIES = "SELECT id, title FROM movies WHERE id = %s;"
     SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > %s;"
-    INSERT_WATCHED_MOVIE = "INSERT INTO watched_movies (username, movie_id) VALUES (%S, %S);"
+    INSERT_WATCHED_MOVIE = "INSERT INTO watched_movies (username, movie_id) VALUES (%s, %s);"
     SELECT_WATCHED_MOVIES = """SELECT movies.*
     FROM users
     JOIN watched_movies ON users.username = watched_movies.user_username
@@ -45,7 +48,17 @@ class DatabaseConnection:
             with self.CONNECTION.cursor() as cursor:
                 cursor.execute(self.INSERT_MOVIE, (title, release_timestamp))
 
+    def add_watched_movie(self, username, movie_id):
+        with self.CONNECTION:
+            with self.CONNECTION.cursor() as cursor:
+                cursor.execute(self.INSERT_WATCHED_MOVIE, (username, movie_id))
 
+    def get_movie_list(self, movie_id):
+        with self.CONNECTION:
+            with self.CONNECTION.cursor() as cursor:
+                cursor.execute(self.SELECT_MOVIES, (movie_id))
+                return cursor.fetchall()
+            
     def get_movie(self, upcoming=False):
         with self.CONNECTION:
             with self.CONNECTION.cursor() as cursor:
@@ -71,6 +84,7 @@ class DatabaseConnection:
         with self.CONNECTION:
             with self.CONNECTION.cursor() as cursor:
                 cursor.execute(self.INSERT_WATCHED_MOVIE, (username, movie_id))
+                return cursor.rowcount
 
     def get_watched_movies(self, username):
         with self.CONNECTION:

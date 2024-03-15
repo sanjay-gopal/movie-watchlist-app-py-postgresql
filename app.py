@@ -2,7 +2,7 @@ from database import DatabaseConnection as db
 from datetime import datetime
 
 class MoviesWatchlist():
-    welcome_message = "Welcome to the watchlist app! \n Press enter key"
+    welcome_message = "Welcome to the watchlist app! Press enter key"
     menu = """Please select one of the following options:
     1) Add new movie.
     2) View upcoming movies.
@@ -13,6 +13,7 @@ class MoviesWatchlist():
 
     Your selection: """
 
+    CURRENT_USER = ""
     def add_movie(self, title, release_date):
         release_timestamp = datetime.today().strptime(release_date, "%d-%m-%Y").timestamp()
         try:
@@ -44,10 +45,22 @@ class MoviesWatchlist():
         users_list = db.get_user(db, username)
         print(users_list)
         if len(users_list) > 0 and username in users_list[0]:
+            self.CURRENT_USER = username
+            db.create_tables(db, query="movies")
+            db.create_tables(db, query="watched_movies")
             return True
         else:
             return False
     
+    def check_movie_available(self, movie_id):
+        res = db.get_movie_list(db, movie_id)
+        if(res != []):
+            print(f"Movie {res[0][1]} Found. Press enter to watch it! ")
+            return True
+        else:
+            print("Movie with ID {movie_id} was not found!")
+            return False
+
     def show_menu(self):
         while (user_input := input(movieObject.menu)) != "6":
             if user_input == "1":
@@ -67,7 +80,22 @@ class MoviesWatchlist():
                 movieObject.get_movies()
 
             elif user_input == "4":
-                pass
+                results = db.get_movie(db)
+                movieObject.show_formatted_movies_list(results)
+                movie_id = input("Enter the movie ID to watch: ")
+                res = movieObject.check_movie_available(movie_id)
+                if(res):
+                    db.watch_movie(db, "", movie_id)
+                    print("Watching Movie...........")
+                    exit(1)
+                else:
+                    exit(1)
+                # res = db.watch_movie(db, username, movie_id)
+                # print(res)
+                # if res == 1:
+                #     print("Watching Movie...........")
+                # exit(1)
+
             elif user_input == "5":
                 pass
             else:
@@ -76,15 +104,16 @@ class MoviesWatchlist():
 if __name__ == "__main__":
     movieObject = MoviesWatchlist()
     username = input("To begin, please choose a username. Enter your desired username and press the Enter key to proceed : ")
+    movieObject.CURRENT_USER = username
     verified_user = movieObject.verify_user(username)
     if(verified_user):
-        print(movieObject.welcome_message)
         movieObject.show_menu()
     else:
         username = input("User not found. Please enter a username to create a new user profile : ")
         user_created = db.add_user(db, username)
         if(user_created):
-            print(movieObject.welcome_message)
+            db.create_tables(db, query="movies")
+            db.create_tables(db, query="watched_movies")
             movieObject.show_menu()
         else:
             print("Oops! Something went wrong. Please try again later.")
