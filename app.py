@@ -36,18 +36,15 @@ class MoviesWatchlist():
         print("S.No  |   Movie Name  |  Release Date")
         print("_____________________________________")
         for i,j,k in results:
-            datetime.fromtimestamp(1710313200).date()
             print("{:<14}{:<11}{}".format(i, j, datetime.fromtimestamp(k).date()))
             print("--------------------------------------")
 
     def verify_user(self, username):
         db.create_tables(db, query="users")
         users_list = db.get_user(db, username)
-        print(users_list)
         if len(users_list) > 0 and username in users_list[0]:
             self.CURRENT_USER = username
-            db.create_tables(db, query="movies")
-            db.create_tables(db, query="watched_movies")
+
             return True
         else:
             return False
@@ -60,6 +57,10 @@ class MoviesWatchlist():
         else:
             print("Movie with ID {movie_id} was not found!")
             return False
+    
+    # def view_watched_movies(self):
+    #     results = db.get_watched_movies(db, self.CURRENT_USER)
+    #     self.show_formatted_movies_list(results)
 
     def show_menu(self):
         while (user_input := input(movieObject.menu)) != "6":
@@ -90,14 +91,10 @@ class MoviesWatchlist():
                     exit(1)
                 else:
                     exit(1)
-                # res = db.watch_movie(db, username, movie_id)
-                # print(res)
-                # if res == 1:
-                #     print("Watching Movie...........")
-                # exit(1)
 
             elif user_input == "5":
-                pass
+                results = db.get_watched_movies(db, self.CURRENT_USER)
+                movieObject.show_formatted_movies_list(results)
             else:
                 print("Invalid input, please try again!")
 
